@@ -57,6 +57,14 @@ resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {
   to_port           = 22
 }
 
+resource "aws_vpc_security_group_ingress_rule" "allow_mysql_ipv4" {
+  security_group_id = aws_security_group.allow_http.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 3306
+  ip_protocol       = "tcp"
+  to_port           = 3306
+}
+
 resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
   security_group_id = aws_security_group.allow_http.id
   cidr_ipv4         = "0.0.0.0/0"
@@ -204,7 +212,39 @@ resource "aws_iam_role_policy" "rds_fullaccess_policy" {
   })
 }
 
-# add additional aws iam role policies here
+resource "aws_iam_role_policy" "sns_fullaccess_policy" {
+  name = "sns_fullaccess_policy"
+  role = aws_iam_role.role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sns:*",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "secretsmanager_fullaccess_policy" {
+  name = "secretsmanager_fullaccess_policy"
+  role = aws_iam_role.role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "secretsmanager:*",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
 
 # creating a private IPv4 subnet per AZ
 # https://stackoverflow.com/questions/63991120/automatically-create-a-subnet-for-each-aws-availability-zone-in-terraform
@@ -250,7 +290,10 @@ resource "aws_launch_template" "lt" {
   instance_type                        = var.instance-type
   key_name                             = var.key-name
   vpc_security_group_ids               = [aws_security_group.allow_http.id]
-  # add aws_iam_instance_profile here
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.coursera_profile.name
+  }
 
   monitoring {
     enabled = false
@@ -478,8 +521,10 @@ resource "aws_sqs_queue" "coursera_queue" {
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic
 resource "aws_sns_topic" "user_updates" {
 
-# complete missing values here
-
+  name = var.user-sns-topic
+  tags = {
+    Name = var.tag-name
+  }
 }
 
 # Generate random password -- this way its never hardcoded into our variables and inserted directly as a secretcheck 
@@ -566,13 +611,14 @@ data "aws_db_subnet_group" "database" {
 # Use the latest production snapshot to create a dev instance.
 resource "aws_db_instance" "default" {
   instance_class      = "db.t3.micro"
-  #db_name             = var.dbname
+  db_name             = var.dbname
   snapshot_identifier = var.snapshot_identifier
   skip_final_snapshot  = true
   username             = data.aws_secretsmanager_secret_version.project_username.secret_string
   password             = data.aws_secretsmanager_secret_version.project_password.secret_string
   vpc_security_group_ids = [data.aws_security_group.coursera-project.id]
-  # Add db subnet group here
+  
+  db_subnet_group_name = aws_db_subnet_group.default.name
 }
 
 output "db-address" {
