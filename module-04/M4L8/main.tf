@@ -474,7 +474,8 @@ data "aws_iam_policy_document" "allow_access_from_another_account-raw" {
     }
 
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:PutObject"
     ]
 
     resources = [
@@ -492,7 +493,8 @@ data "aws_iam_policy_document" "allow_access_from_another_account-finished" {
     }
 
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:PutObject"
     ]
 
     resources = [
@@ -611,7 +613,8 @@ data "aws_db_subnet_group" "database" {
 # Use the latest production snapshot to create a dev instance.
 resource "aws_db_instance" "default" {
   instance_class      = "db.t3.micro"
-  db_name             = var.dbname
+  # db name must be null when using a snapshot
+  #db_name             = var.dbname
   snapshot_identifier = var.snapshot_identifier
   skip_final_snapshot  = true
   username             = data.aws_secretsmanager_secret_version.project_username.secret_string
