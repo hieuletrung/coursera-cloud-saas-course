@@ -35,6 +35,7 @@ responsePWORD = clientSM.get_secret_value(
 # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/rds/client/describe_db_instances.html
 print("Retrieving RDS instance information...")
 responseRDS = clientRDS.describe_db_instances()
+print("RDS instance information retrieved successfully..." + str(responseRDS))
 
 ##############################################################################
 # Set database credentials
@@ -80,6 +81,7 @@ if messagesInQueue == True:
     cursor.execute(query, [(responseMessages['Messages'][0]['Body'])])
 
     print("Printing out all the fields in the record...")
+    RAWS3URL = ""
     for (ID, RecordNumber, CustomerName, Email, Phone, Stat, RAWS3URL, FINSIHEDS3URL) in cursor:
         print("ID: " + str(ID) + " RecordNumber: " + str(RecordNumber) + " CustomerName: " + CustomerName )
         print("Email: " + Email + " Phone: " + str(Phone) + " Status: " + str(Stat))
