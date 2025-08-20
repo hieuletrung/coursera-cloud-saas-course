@@ -167,8 +167,8 @@ const getDBIdentifier = async () => {
         const command = new DescribeDBInstancesCommand({});
         try {
           const results = await client.send(command);
-          //console.log("List RDS results: ", results.DBInstances[0].DBInstanceIdentifier);
-          //console.log("List RDS Endpoint results: ", results.DBInstances[0].Endpoint.Address);
+          console.log("List RDS results: ", results.DBInstances[0].DBInstanceIdentifier);
+          console.log("List RDS Endpoint results: ", results.DBInstances[0].Endpoint.Address);
           return results;
         } catch (err) {
           console.error(err);
