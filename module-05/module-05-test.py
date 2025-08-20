@@ -287,16 +287,18 @@ print("Named: vegeta.jpg and knuth.jpg...")
 
 knuth = False
 vegeta = False
-
+print("responseS3['Buckets'] contains the following buckets: " + str(responseS3['Buckets']))
 for n in range(0,len(responseS3['Buckets'])):
   if "finished" in responseS3['Buckets'][n]['Name']:
     BUCKET_NAME = responseS3['Buckets'][n]['Name']
+
+print("BUCKET_NAME: " + BUCKET_NAME)
 
 responseS3Object = clients3.list_objects(
   Bucket=BUCKET_NAME 
   )
 
-print("List Object Key Names found in the finished bucket...")
+print("List Object Key Names found in the finished bucket..." + BUCKET_NAME + "..." + str(responseS3Object['Contents']))
 try:
   if len(responseS3Object['Contents']) >= correctNumberOfObjectsInFinishedBucket:
     for n in range(0,len(responseS3Object['Contents'])):
@@ -315,11 +317,11 @@ try:
       currentPoints()
 
   else:
-    print("The number of the images in your Finished bucket is below " + correctNumberOfObjectsInFinishedBucket + "...")
+    print("The number of the images in your Finished bucket is below " + str(correctNumberOfObjectsInFinishedBucket) + "...")
     print("Make sure you have gone to the ELB URL and uploaded the required number of images to the functioning application...")
     currentPoints()
-except:
-  print("No objects found in the finished bucket -- try to upload one image to your app...")
+except Exception as e:
+  print("No objects found in the finished bucket -- try to upload one image to your app...", e)
   currentPoints()
   #exit(0)
 
@@ -391,6 +393,7 @@ responseRetrieveMessage = clientsqs.receive_message(
     VisibilityTimeout=15
 )
 
+print("Message(s) in the SQS Queue: " + str(responseRetrieveMessage))
 # Check to see if the queue is empty using the try/except block
 try:
   responseRetrieveMessage['Messages']
