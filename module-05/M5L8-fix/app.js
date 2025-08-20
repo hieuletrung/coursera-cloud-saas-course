@@ -47,7 +47,7 @@ const s3 = new S3Client({ region: REGION });
 // I hardcoded my S3 bucket name, this you need to determine dynamically
 // Using the AWS JavaScript SDK
 ///////////////////////////////////////////////////////////////////////////
-var bucketName = '';
+var bucketName = 'module-05-raw-bucket';
 //listBuckets().then(result =>{bucketName = result;}).catch(err=>{console.error("listBuckets function call failed.")});
 	var upload = multer({
         storage: multerS3({
@@ -427,7 +427,7 @@ const subscribeEmailToSNSTopic = async () => {
   let topicArn = await getListOfSnsTopics();
   const params = {
     // CHANGE ENDPOINT EMAIL TO YOUR OWN
-    Endpoint: "",
+    Endpoint: "hieuletrung@gmail.com",
     Protocol: "email",
     TopicArn: topicArn.Topics[0].TopicArn,
   };

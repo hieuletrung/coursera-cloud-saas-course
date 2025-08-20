@@ -233,10 +233,33 @@ if messagesInQueue == True:
     # Graded component
     # Add code to update the RAWS3URL to have the value: done after the image is processed
     #############################################################################
-
-
+    # Update RAWS3URL to "done" after image is processed
+    cnx = mysql.connector.connect(host=hosturl, user=uname, password=pword, database='company')
+    cursor = cnx.cursor()
+    update_raw = ("UPDATE entries SET RAWS3URL = 'done' WHERE ID = " + str(ID) + ";")
+    print(update_raw)
+    cursor.execute(update_raw)
+    cnx.commit()
+    cursor.close()
+    cnx.close()
 
     #############################################################################
     # Extra challenge, not graded...
     # Could you add code to unsubscribe your email from the Topic once you received the image?
     #############################################################################
+    # List all subscriptions for the topic
+    responseSubs = clientSNS.list_subscriptions_by_topic(
+        TopicArn=responseTopics['Topics'][0]['TopicArn']
+    )
+
+    # Find the subscription with your email endpoint
+    for sub in responseSubs['Subscriptions']:
+        if sub['Endpoint'] == "hieuletrung@gmail.com":
+            subscription_arn = sub['SubscriptionArn']
+            print(f"Unsubscribing {sub['Endpoint']} from {sub['TopicArn']}")
+            # Unsubscribe
+            clientSNS.unsubscribe(
+                SubscriptionArn=subscription_arn
+            )
+            print("Unsubscribed successfully.")
+            break
