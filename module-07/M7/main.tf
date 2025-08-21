@@ -480,7 +480,8 @@ data "aws_iam_policy_document" "allow_access_from_another_account-raw" {
     }
 
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:PutObject"
     ]
 
     resources = [
@@ -498,7 +499,8 @@ data "aws_iam_policy_document" "allow_access_from_another_account-finished" {
     }
 
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:PutObject"
     ]
 
     resources = [
@@ -608,14 +610,59 @@ resource "aws_iam_role_policy" "s3_fullaccess_lambda_policy" {
 # Create IAM Role Policy for SNS, SQS, and DynamoDB attach to the lambda role
 ##############################################################################
 
+resource "aws_iam_role_policy" "sns_fullaccess_lambda_policy" {
+  name = "sns_fullaccess_lambda_policy"
+  role = aws_iam_role.iam_for_lambda.id
 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:*"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 
+resource "aws_iam_role_policy" "sqs_fullaccess_lambda_policy" {
+  name = "sqs_fullaccess_lambda_policy"
+  role = aws_iam_role.iam_for_lambda.id
 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:*"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 
-# Here
+resource "aws_iam_role_policy" "dynamodb_fullaccess_lambda_policy" {
+  name = "dynamodb_fullaccess_lambda_policy"
+  role = aws_iam_role.iam_for_lambda.id
 
-
-
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:*"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 
 
 # Create Lambda Function

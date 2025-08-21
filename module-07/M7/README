@@ -1,0 +1,7 @@
+mkdir lambda_build
+cp lambda_function.py lambda_build/
+docker run -it -v "$PWD/lambda_build":/var/task public.ecr.aws/lambda/python:3.10 bash
+pip install pillow boto3 -t /var/task
+exit
+cd lambda_build
+zip -r ../my_deployment_package.zip .
