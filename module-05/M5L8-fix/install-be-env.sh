@@ -12,6 +12,8 @@ sudo apt install -y python3-dev python3-setuptools python3-pip python3-venv
 #python3 -m pip install boto3
 #python3 -m pip install mysql-connector-python
 
+cd /home/ubuntu
+sudo -u ubuntu python3 -m venv venv
 . venv/bin/activate
 python3 -m pip install --upgrade pip
 python3 -m pip install pillow
