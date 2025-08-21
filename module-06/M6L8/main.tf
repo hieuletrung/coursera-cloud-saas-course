@@ -192,8 +192,23 @@ resource "aws_iam_role_policy" "s3_fullaccess_policy" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy
-# Add DynamoDB full access policy
+resource "aws_iam_role_policy" "dynamodb_fullaccess_policy" {
+  name = "dynamodb_fullaccess_policy"
+  role = aws_iam_role.role.id
 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "dynamodb:*"
+        ]
+        Effect = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy
 resource "aws_iam_role_policy" "sns_fullaccess_policy" {
   name = "sns_fullaccess_policy"
@@ -462,7 +477,8 @@ data "aws_iam_policy_document" "allow_access_from_another_account-raw" {
     }
 
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:PutObject"
     ]
 
     resources = [
@@ -480,7 +496,8 @@ data "aws_iam_policy_document" "allow_access_from_another_account-finished" {
     }
 
     actions = [
-      "s3:GetObject"
+      "s3:GetObject",
+      "s3:PutObject"
     ]
 
     resources = [
@@ -547,8 +564,12 @@ resource "aws_dynamodb_table" "coursera-dynamodb-table" {
   billing_mode   = "PROVISIONED"
   read_capacity  = 20
   write_capacity = 20
-  # Add hash key of type String and the RecordNumber attribute
+  hash_key       = "RecordNumber"
 
+  attribute {
+    name = "RecordNumber"
+    type = "S"
+  }
   # This will be the UUID and how we uniquely identify records
 
 
@@ -571,10 +592,10 @@ resource "aws_dynamodb_table_item" "insert-sample-record" {
   item = <<ITEM
 {
   "Email": {"S": ""},
-  "RecordNumber": {"S": ""},
+  "RecordNumber": {"S": "sample-1"},
   "CustomerName": {"S": ""},
   "Phone": {"S": ""},
-  "Stat": {"N": ""},
+  "Stat": {"N": "0"},
   "RAWS3URL": {"S": ""},
   "FINSIHEDS3URL": {"S": ""}
 }
